@@ -1,10 +1,10 @@
 import os
+import time
 from urllib.request import urlopen
 
-import telegram
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-
+from telegram.ext import Filters, MessageHandler, Updater
 
 load_dotenv()
 
@@ -12,9 +12,11 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 RETRY_PERIOD = 60
 
+updater = Updater(token=TELEGRAM_TOKEN)
+
 
 def site_parsing():
-    """Получение данных сайта."""
+    """Получение данных сайта (парсинг)."""
     url = "https://events.yandex.ru/"
     page = urlopen(url)
     html = page.read().decode("utf-8")
@@ -25,7 +27,7 @@ def site_parsing():
 
 
 def processing_data_website():
-    """Обработка данных сайта после парсинга."""
+    """Обработка данных сайта после парсинга. Получение информации"""
     events = site_parsing()
     data_events = []
     for event in events:
@@ -50,25 +52,21 @@ def processing_data_website():
     return data_events
 
 
-def send_message(bot, message):
-    """
-    Провреяет доступность токенов.
+def send_message(update, context):
+    """Отправка сообщений."""
+    chat = update.effective_chat
+    text = str(processing_data_website())
 
-    Возвращает: Returns
-    True - если токены доступны,
-    False - если хотя бы одного токена нет.
-    """
-    bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+    while True:
+        context.bot.send_message(chat_id=chat.id, text=text)
+        time.sleep(RETRY_PERIOD)
 
 
 def main():
-    """Основная логика работы бота."""
-    bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    send_message(bot, str(processing_data_website()))
-
-    # while True:
-    #     send_message(bot, str(processing_data_website()))
-    #     time.sleep(RETRY_PERIOD)
+    """Запуск работы бота."""
+    updater.dispatcher.add_handler(MessageHandler(Filters.text, send_message))
+    updater.start_polling()
+    updater.idle()
 
 
 if __name__ == '__main__':
