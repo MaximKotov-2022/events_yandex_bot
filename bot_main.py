@@ -1,5 +1,4 @@
 import os
-import time
 from urllib.request import urlopen
 
 from bs4 import BeautifulSoup
@@ -10,9 +9,7 @@ load_dotenv()
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-RETRY_PERIOD = 60
-
-updater = Updater(token=TELEGRAM_TOKEN)
+RETRY_PERIOD = 3600
 
 
 def site_parsing():
@@ -30,22 +27,23 @@ def processing_data_website():
     """Обработка данных сайта после парсинга. Получение информации"""
     events = site_parsing()
     data_events = []
+
     for event in events:
         if len(event) != 0:
-            date = 'Дата: ' + event.find(class_='event-card__date').text
-            name = 'Название: ' + event.find(class_='event-card__title').text
+            date = event.find(class_='event-card__date').text
+            name = event.find(class_='event-card__title').text
             if 'https' not in event.find('a').get('href'):
                 site = (
-                    'Ссылка: ' + 'https://events.yandex.ru'
-                    + event.find('a').get('href')
+                    'https://events.yandex.ru' + event.find('a').get('href')
                 )
             else:
-                site = 'Ссылка: ' + event.find('a').get('href')
+                site = event.find('a').get('href')
+
             data_events.append(
                 {
-                    'date': date,
-                    'name': name,
-                    'site': site,
+                    "date": date,
+                    "name": name,
+                    "site": site,
                 }
             )
 
@@ -53,17 +51,32 @@ def processing_data_website():
 
 
 def send_message(update, context):
-    """Отправка сообщений."""
-    chat = update.effective_chat
-    text = str(processing_data_website())
+    """Отправка сообщений.
 
-    while True:
-        context.bot.send_message(chat_id=chat.id, text=text)
-        time.sleep(RETRY_PERIOD)
+    Работает при отправке любого сообщения только один раз.
+    """
+    chat = update.effective_chat
+    data = processing_data_website()
+    text = []
+
+    for event in data:
+        date = event['date']
+        name = event['name']
+        site = event['site']
+        text.append(f'Дата: {date}\nНазвание: {name}\nСайт: {site}\n\n\n')
+
+    context.bot.send_message(
+        chat_id=chat.id,
+        text=''.join(text),
+        disable_web_page_preview=True,
+    )
+
+    text.clear()
 
 
 def main():
-    """Запуск работы бота."""
+    """Запуск бота."""
+    updater = Updater(token=TELEGRAM_TOKEN)
     updater.dispatcher.add_handler(MessageHandler(Filters.text, send_message))
     updater.start_polling()
     updater.idle()
