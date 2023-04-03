@@ -54,18 +54,6 @@ class GetData:
 
 
 class ProcessingDataBot():
-    def hi_say_first_message(update, context):
-        chat = update.effective_chat
-        context.bot.send_message(
-            chat_id=chat.id,
-            text=(
-                "Привет! Это бот для получения информации о событиях "
-                "Яндекса.\n"
-                "Тут можно узнать о всех мероприятиях, подписаться на "
-                "обновления, а также узнать о мероприятиях в Москве."
-            )
-        )
-
     def process_information_parsing(update, context):
         """Обработка информации после парсинга."""
         data = GetData.processing_data_website()
@@ -106,6 +94,19 @@ class ProcessingDataBot():
     def events_city(update, context):
         """Подписаться на обновления мероприятий в Москве."""
         ...
+
+    def hi_say_first_message(update, context):
+        chat = update.effective_chat
+        context.bot.send_message(
+            chat_id=chat.id,
+            text=(
+                "Привет! Это бот для получения информации о событиях "
+                "Яндекса.\n"
+                "Тут можно узнать о всех мероприятиях, подписаться на "
+                "обновления, а также узнать о мероприятиях в Москве."
+            )
+        )
+        ProcessingDataBot.send_message(update, context)
 
 
 def main():
