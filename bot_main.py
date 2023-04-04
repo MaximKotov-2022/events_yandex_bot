@@ -4,8 +4,8 @@ from urllib.request import urlopen
 
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-from telegram.ext import Filters, MessageHandler, Updater, CommandHandler
 from telegram import ReplyKeyboardMarkup
+from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 load_dotenv()
 
@@ -15,7 +15,8 @@ RETRY_PERIOD = 3600
 
 
 class GetData:
-    def site_parsing():
+    """Класс с методами для обработки данных с сайта."""
+    def site_parsing() -> str:
         """Получение данных сайта (парсинг)."""
         url = "https://events.yandex.ru/"
         page = urlopen(url)
@@ -25,7 +26,7 @@ class GetData:
 
         return events
 
-    def processing_data_website():
+    def processing_data_website() -> list:
         """Обработка данных сайта после парсинга."""
         events = GetData.site_parsing()
         data_events = []
@@ -52,9 +53,7 @@ class GetData:
 
         return data_events
 
-
-class ProcessingDataBot():
-    def process_information_parsing(update, context):
+    def process_information_parsing(update, context) -> list:
         """Обработка информации после парсинга."""
         data = GetData.processing_data_website()
         text = []
@@ -65,37 +64,58 @@ class ProcessingDataBot():
             text.append(f'Дата: {date}\nНазвание: {name}\nСайт: {site}\n\n\n')
         return text
 
+
+class ProcessingDataBot():
+    """Класс для работы с ботом."""
     def send_message(update, context):
         """Отправка сообщений."""
-        text = ProcessingDataBot.process_information_parsing(update, context)
+        text = GetData.process_information_parsing(update, context)
         chat = update.effective_chat
 
         buttons = ReplyKeyboardMarkup([
-            ['Подписаться', 'Отписаться'],
             ['Все мероприятия', 'Мероприятия в Москве'],
+            ['Подписаться', 'Отписаться'],
         ],
             resize_keyboard=True,
         )
+
         context.bot.send_message(
             chat_id=chat.id,
             text=''.join(text),
             reply_markup=buttons,
             disable_web_page_preview=True,
         )
+        return 0
+
+    def checking_data_changes(update, context):
+        """Проверка изменений/обновлений данных с сайта.
+        Если данные изменились, то возарвращается True
+        Если нет - False."""
+        while True:
+            old_data = GetData.process_information_parsing(update, context)
+            time.sleep(5)  # Интервал проверки обновлений на сайте
+            new_data = GetData.process_information_parsing(update, context)
+            print(old_data, new_data, end='\n')  # Для проверки работы запросов
+            if old_data != new_data:
+                old_data = new_data
+                return True
+            return False
 
     def subscribe_updates(update, context):
         """Подписаться на все обновления мероприятий."""
-        old_data = ProcessingDataBot.send_message(update, context)
-        time.sleep(RETRY_PERIOD)
         while True:
-            if old_data != GetData.send_message(update, context):
-                GetData.send_message(update, context)
+            if (ProcessingDataBot.checking_data_changes(update, context) is
+                    True):
+                ProcessingDataBot.send_message(update, context)
 
-    def events_city(update, context):
-        """Подписаться на обновления мероприятий в Москве."""
+    def unsubscribe(update, context):
+        """Отписка от обновлений мероприятий.
+        Остановка функции подписки на обновления (subscribe_updates)."""
         ...
 
     def hi_say_first_message(update, context):
+        """Отправка первого сообщения.
+        Получение инфо о возможностях бота."""
         chat = update.effective_chat
         context.bot.send_message(
             chat_id=chat.id,
@@ -110,24 +130,30 @@ class ProcessingDataBot():
 
 
 def main():
-    """Запуск бота."""
+    """Запуск бота. Создание обработчиков сообщений."""
     updater = Updater(token=TELEGRAM_TOKEN)
+
     updater.dispatcher.add_handler(CommandHandler(
-        'start', ProcessingDataBot.hi_say_first_message)
+        'start', ProcessingDataBot.hi_say_first_message,
+        run_async=True,
+        )
     )
     updater.dispatcher.add_handler(MessageHandler(
         Filters.text('Все мероприятия'),
-        ProcessingDataBot.send_message
+        ProcessingDataBot.send_message,
+        run_async=True,
         )
     )
     updater.dispatcher.add_handler(MessageHandler(
         Filters.text('Подписаться'),
-        ProcessingDataBot.subscribe_updates
+        ProcessingDataBot.subscribe_updates,
+        run_async=True,
         )
     )
     updater.dispatcher.add_handler(MessageHandler(
-        Filters.text('Мероприятия в Москве'),
-        ProcessingDataBot.events_city
+        Filters.text('Отписаться'),
+        ProcessingDataBot.unsubscribe,
+        run_async=True,
         )
     )
 
