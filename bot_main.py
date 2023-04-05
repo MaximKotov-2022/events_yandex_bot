@@ -15,7 +15,7 @@ RETRY_PERIOD = 3600
 
 
 class GetData:
-    """Класс с методами для обработки данных с сайта."""
+    """Описание методов обработки данных с сайта."""
     def site_parsing() -> str:
         """Получение данных сайта (парсинг)."""
         url = "https://events.yandex.ru/"
@@ -66,14 +66,13 @@ class GetData:
 
 
 class ProcessingDataBot():
-    """Класс для работы с ботом."""
-    def send_message(update, context):
+    """Описание методов работы бота."""
+    def send_message(update, context, text):
         """Отправка сообщений."""
-        text = GetData.process_information_parsing(update, context)
         chat = update.effective_chat
 
         buttons = ReplyKeyboardMarkup([
-            ['Все мероприятия', 'Мероприятия в Москве'],
+            ['Все мероприятия'],
             ['Подписаться', 'Отписаться'],
         ],
             resize_keyboard=True,
@@ -81,11 +80,21 @@ class ProcessingDataBot():
 
         context.bot.send_message(
             chat_id=chat.id,
-            text=''.join(text),
+            text=text,
             reply_markup=buttons,
             disable_web_page_preview=True,
         )
         return 0
+
+    def all_events(update, context):
+        """Актульаные меропрития."""
+        text = ''.join(GetData.process_information_parsing(update, context))
+
+        return ProcessingDataBot.send_message(
+                update,
+                context,
+                text=text,
+            )
 
     def checking_data_changes(update, context):
         """Проверка изменений/обновлений данных с сайта.
@@ -93,9 +102,9 @@ class ProcessingDataBot():
         Если нет - False."""
         while True:
             old_data = GetData.process_information_parsing(update, context)
-            time.sleep(5)  # Интервал проверки обновлений на сайте
+            time.sleep(RETRY_PERIOD)  # Интервал проверки обновлений на сайте
             new_data = GetData.process_information_parsing(update, context)
-            print(old_data, new_data, end='\n')  # Для проверки работы запросов
+            # print(old_data, new_data, end='\n')  # Для проверки работы запро
             if old_data != new_data:
                 old_data = new_data
                 return True
@@ -103,30 +112,36 @@ class ProcessingDataBot():
 
     def subscribe_updates(update, context):
         """Подписаться на все обновления мероприятий."""
+        text = (
+            'Вы подписаны!\nПри обновлении данных Вы получите сообщение.'
+        )
+        ProcessingDataBot.send_message(update, context, text=text)
+
         while True:
             if (ProcessingDataBot.checking_data_changes(update, context) is
                     True):
-                ProcessingDataBot.send_message(update, context)
+                ProcessingDataBot.all_events(update, context)
 
     def unsubscribe(update, context):
         """Отписка от обновлений мероприятий.
         Остановка функции подписки на обновления (subscribe_updates)."""
-        ...
+        text = "Вы отписаны"
+        ProcessingDataBot.send_message(update, context, text=text)
 
     def hi_say_first_message(update, context):
         """Отправка первого сообщения.
         Получение инфо о возможностях бота."""
-        chat = update.effective_chat
-        context.bot.send_message(
-            chat_id=chat.id,
-            text=(
-                "Привет! Это бот для получения информации о событиях "
+        text = ("Привет! Это бот для получения информации о событиях "
                 "Яндекса.\n"
                 "Тут можно узнать о всех мероприятиях, подписаться на "
                 "обновления, а также узнать о мероприятиях в Москве."
+                )
+
+        return ProcessingDataBot.send_message(
+                update,
+                context,
+                text=text,
             )
-        )
-        ProcessingDataBot.send_message(update, context)
 
 
 def main():
@@ -134,13 +149,14 @@ def main():
     updater = Updater(token=TELEGRAM_TOKEN)
 
     updater.dispatcher.add_handler(CommandHandler(
-        'start', ProcessingDataBot.hi_say_first_message,
+        'start',
+        ProcessingDataBot.hi_say_first_message,
         run_async=True,
         )
     )
     updater.dispatcher.add_handler(MessageHandler(
         Filters.text('Все мероприятия'),
-        ProcessingDataBot.send_message,
+        ProcessingDataBot.all_events,
         run_async=True,
         )
     )
