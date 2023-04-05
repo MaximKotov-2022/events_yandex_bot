@@ -104,7 +104,7 @@ class ProcessingDataBot():
             old_data = GetData.process_information_parsing(update, context)
             time.sleep(RETRY_PERIOD)  # Интервал проверки обновлений на сайте
             new_data = GetData.process_information_parsing(update, context)
-            # print(old_data, new_data, end='\n')  # Для проверки работы запро
+
             if old_data != new_data:
                 old_data = new_data
                 return True
