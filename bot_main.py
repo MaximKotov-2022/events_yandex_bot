@@ -1,21 +1,23 @@
 import os
 import time
+import threading
 from urllib.request import urlopen
 
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-from telegram import ReplyKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, ParseMode
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 load_dotenv()
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-RETRY_PERIOD = 3600
+RETRY_PERIOD = 1800
 
 
 class GetData:
     """Описание методов обработки данных с сайта."""
+
     def site_parsing() -> str:
         """Получение данных сайта (парсинг)."""
         url = "https://events.yandex.ru/"
@@ -67,6 +69,7 @@ class GetData:
 
 class ProcessingDataBot():
     """Описание методов работы бота."""
+
     def send_message(update, context, text):
         """Отправка сообщений."""
         chat = update.effective_chat
@@ -83,6 +86,7 @@ class ProcessingDataBot():
             text=text,
             reply_markup=buttons,
             disable_web_page_preview=True,
+            parse_mode=ParseMode.HTML,
         )
         return 0
 
@@ -110,6 +114,9 @@ class ProcessingDataBot():
                 return True
             return False
 
+    stop_subscribe_updates = threading.Event()
+
+    @staticmethod
     def subscribe_updates(update, context):
         """Подписаться на все обновления мероприятий."""
         text = (
@@ -117,24 +124,35 @@ class ProcessingDataBot():
         )
         ProcessingDataBot.send_message(update, context, text=text)
 
-        while True:
-            if (ProcessingDataBot.checking_data_changes(update, context) is
-                    True):
+        while not ProcessingDataBot.stop_subscribe_updates.is_set():
+            if ProcessingDataBot.checking_data_changes(update, context):
                 ProcessingDataBot.all_events(update, context)
 
+        # если подписка остановлена, сбрасываем флаг
+        ProcessingDataBot.stop_subscribe_updates.clear()
+
+    @staticmethod
     def unsubscribe(update, context):
         """Отписка от обновлений мероприятий.
         Остановка функции подписки на обновления (subscribe_updates)."""
         text = "Вы отписаны"
         ProcessingDataBot.send_message(update, context, text=text)
 
+        # останавливаем подписку на обновления
+        ProcessingDataBot.stop_subscribe_updates.set()
+
     def hi_say_first_message(update, context):
         """Отправка первого сообщения.
         Получение инфо о возможностях бота."""
         text = ("Привет! Это бот для получения информации о событиях "
                 "Яндекса.\n"
-                "Тут можно узнать о всех мероприятиях, подписаться на "
-                "обновления, а также узнать о мероприятиях в Москве."
+
+                "<u>Все мероприятия</u> - узнать об актуальных событиях\n"
+
+                "<u>Подписаться</u> - получать сообщения при обновлении "
+                "информации.\n"
+
+                "<u>Отписаться</u> - отписаться от уведомлений."
                 )
 
         return ProcessingDataBot.send_message(
