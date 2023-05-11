@@ -11,7 +11,6 @@ from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 load_dotenv()
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 RETRY_PERIOD = 1800
 
 
