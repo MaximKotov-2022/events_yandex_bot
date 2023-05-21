@@ -106,5 +106,5 @@ python3 manage.py migrate
 python3 run_bot_api.py
 ```
 
-## Автор
+#### Автор
 Котов Максим
