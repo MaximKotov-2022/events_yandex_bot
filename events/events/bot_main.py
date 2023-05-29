@@ -116,7 +116,6 @@ class ProcessingDataBot():
 
     stop_subscribe_updates = threading.Event()
 
-    @staticmethod
     def subscribe_updates(update, context):
         """Подписаться на все обновления мероприятий."""
         text = (
