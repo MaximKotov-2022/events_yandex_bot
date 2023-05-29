@@ -133,7 +133,7 @@ class ProcessingDataBot():
 
     def unsubscribe(update, context):
         """Отписка от обновлений мероприятий.
-    
+
         Остановка функции подписки на обновления (subscribe_updates)."""
         text = "Вы отписаны"
         ProcessingDataBot.send_message(update, context, text=text)
@@ -143,7 +143,7 @@ class ProcessingDataBot():
 
     def hi_say_first_message(update, context):
         """Отправка первого сообщения.
-    
+
         Получение инфо о возможностях бота."""
         text = ("Привет! Это бот для получения информации о событиях "
                 "Яндекса.\n"
