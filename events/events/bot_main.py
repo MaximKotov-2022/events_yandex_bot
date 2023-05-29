@@ -101,6 +101,7 @@ class ProcessingDataBot():
 
     def checking_data_changes(update, context):
         """Проверка изменений/обновлений данных с сайта.
+
         Если данные изменились, то возарвращается True
         Если нет - False."""
         while True:
@@ -130,9 +131,9 @@ class ProcessingDataBot():
         # если подписка остановлена, сбрасываем флаг
         ProcessingDataBot.stop_subscribe_updates.clear()
 
-    @staticmethod
     def unsubscribe(update, context):
         """Отписка от обновлений мероприятий.
+    
         Остановка функции подписки на обновления (subscribe_updates)."""
         text = "Вы отписаны"
         ProcessingDataBot.send_message(update, context, text=text)
@@ -142,6 +143,7 @@ class ProcessingDataBot():
 
     def hi_say_first_message(update, context):
         """Отправка первого сообщения.
+    
         Получение инфо о возможностях бота."""
         text = ("Привет! Это бот для получения информации о событиях "
                 "Яндекса.\n"
