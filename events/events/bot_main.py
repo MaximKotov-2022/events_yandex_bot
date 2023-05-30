@@ -1,3 +1,4 @@
+import datetime
 import os
 import threading
 import time
@@ -28,7 +29,10 @@ class GetData:
         return events
 
     def processing_data_website() -> list:
-        """Обработка данных сайта после парсинга."""
+        """Обработка данных сайта после парсинга.
+
+        Возвращает словарь (date, name, site).
+        """
 
         events = GetData.site_parsing()
         data_events = []
@@ -56,7 +60,9 @@ class GetData:
         return data_events
 
     def process_information_parsing(update, context) -> list:
-        """Обработка информации после парсинга."""
+        """Обработка информации после парсинга.
+
+        Возвращает строчку с данными о событиях."""
 
         data = GetData.processing_data_website()
         text = []
@@ -72,12 +78,16 @@ class ProcessingDataBot():
     """Описание методов работы бота."""
 
     def send_message(update, context, text):
-        """Отправка сообщений."""
+        """Отправка сообщений.
+
+        Принимает текст сообщения.
+        """
 
         chat = update.effective_chat
 
         buttons = ReplyKeyboardMarkup([
             ['Все мероприятия'],
+            ['Добавить событие в календарь'],
             ['Подписаться', 'Отписаться'],
         ],
             resize_keyboard=True,
@@ -147,6 +157,24 @@ class ProcessingDataBot():
         # останавливаем подписку на обновления
         ProcessingDataBot.stop_subscribe_updates.set()
 
+    def add_event_calendar(update, context):
+        data = GetData.processing_data_website()
+        k_date_event = []
+        for _, event in enumerate(data):
+            if 'сегодня' in event['date']:
+                k_date_event.append(str(datetime.date.today()))
+            elif 'завтра' in event['date']:
+                k_date_event.append(str(datetime.date.today() + 1))
+            else:
+                k_date_event.append(event['date'])
+
+        print(k_date_event)
+
+        # Из k_date_event получаем количество и название кнопок.
+        # Она хранит дату мероприятия.
+        # Нжуно дату передавать в календарь через API и добавлять мероприятие.
+        # Какие данные ещё нужны? (Дата в гггг-мм-чч, назвнаие Event)
+
     def hi_say_first_message(update, context):
         """Отправка первого сообщения.
 
@@ -184,6 +212,12 @@ def main():
     updater.dispatcher.add_handler(MessageHandler(
         Filters.text('Все мероприятия'),
         ProcessingDataBot.all_events,
+        run_async=True,
+        )
+    )
+    updater.dispatcher.add_handler(MessageHandler(
+        Filters.text('Добавить событие в календарь'),
+        ProcessingDataBot.add_event_calendar,
         run_async=True,
         )
     )
