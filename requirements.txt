@@ -21,7 +21,7 @@ snowballstemmer==2.2.0
 soupsieve==2.4
 sqlparse==0.4.4
 telegram==0.0.1
-tornado==6.2
+tornado==6.3.2
 tzdata==2023.3
 tzlocal==4.3
 urllib3==1.26.14
