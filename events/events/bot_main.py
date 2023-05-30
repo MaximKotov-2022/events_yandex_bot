@@ -29,6 +29,7 @@ class GetData:
 
     def processing_data_website() -> list:
         """Обработка данных сайта после парсинга."""
+
         events = GetData.site_parsing()
         data_events = []
 
@@ -56,6 +57,7 @@ class GetData:
 
     def process_information_parsing(update, context) -> list:
         """Обработка информации после парсинга."""
+
         data = GetData.processing_data_website()
         text = []
         for event in data:
@@ -71,6 +73,7 @@ class ProcessingDataBot():
 
     def send_message(update, context, text):
         """Отправка сообщений."""
+
         chat = update.effective_chat
 
         buttons = ReplyKeyboardMarkup([
@@ -91,6 +94,7 @@ class ProcessingDataBot():
 
     def all_events(update, context):
         """Актульаные меропрития."""
+
         text = ''.join(GetData.process_information_parsing(update, context))
 
         return ProcessingDataBot.send_message(
@@ -104,6 +108,7 @@ class ProcessingDataBot():
 
         Если данные изменились, то возарвращается True
         Если нет - False."""
+
         while True:
             old_data = GetData.process_information_parsing(update, context)
             time.sleep(RETRY_PERIOD)  # Интервал проверки обновлений на сайте
@@ -118,6 +123,7 @@ class ProcessingDataBot():
 
     def subscribe_updates(update, context):
         """Подписаться на все обновления мероприятий."""
+
         text = (
             'Вы подписаны!\nПри обновлении данных Вы получите сообщение.'
         )
@@ -134,6 +140,7 @@ class ProcessingDataBot():
         """Отписка от обновлений мероприятий.
 
         Остановка функции подписки на обновления (subscribe_updates)."""
+
         text = "Вы отписаны"
         ProcessingDataBot.send_message(update, context, text=text)
 
@@ -144,6 +151,7 @@ class ProcessingDataBot():
         """Отправка первого сообщения.
 
         Получение инфо о возможностях бота."""
+
         text = ("Привет! Это бот для получения информации о событиях "
                 "Яндекса.\n"
 
@@ -164,6 +172,7 @@ class ProcessingDataBot():
 
 def main():
     """Запуск бота. Создание обработчиков сообщений."""
+
     updater = Updater(token=TELEGRAM_TOKEN)
 
     updater.dispatcher.add_handler(CommandHandler(
