@@ -3,13 +3,13 @@ from multiprocessing import Process
 
 
 def run_telegram_bot():
-    '''Метод запуска Telegram-бота.'''
+    """Метод запуска Telegram-бота."""
     os.chdir('events/events/')
     os.system('python bot_main.py')
 
 
 def run_django_server():
-    '''Метод запуска сервера Django. Работа API.'''
+    """Метод запуска сервера Django. Работа API."""
     os.chdir('events/')
     os.system('python manage.py runserver')
 

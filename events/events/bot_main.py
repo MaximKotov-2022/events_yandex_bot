@@ -74,7 +74,7 @@ class GetData:
         return text
 
 
-class ProcessingDataBot():
+class ProcessingDataBot:
     """Описание методов работы бота."""
 
     def send_message(update, context, text):
@@ -103,7 +103,7 @@ class ProcessingDataBot():
         return 0
 
     def all_events(update, context):
-        """Актульаные меропрития."""
+        """Актуальные мероприятия."""
 
         text = ''.join(GetData.process_information_parsing(update, context))
 
@@ -116,7 +116,7 @@ class ProcessingDataBot():
     def checking_data_changes(update, context):
         """Проверка изменений/обновлений данных с сайта.
 
-        Если данные изменились, то возарвращается True
+        Если данные изменились, то возвращается True
         Если нет - False."""
 
         while True:
@@ -173,7 +173,7 @@ class ProcessingDataBot():
         # Из k_date_event получаем количество и название кнопок.
         # Она хранит дату мероприятия.
         # Нжуно дату передавать в календарь через API и добавлять мероприятие.
-        # Какие данные ещё нужны? (Дата в гггг-мм-чч, назвнаие Event)
+        # Какие данные ещё нужны? (Дата в гггг-мм-чч, название Event)
 
     def hi_say_first_message(update, context):
         """Отправка первого сообщения.
