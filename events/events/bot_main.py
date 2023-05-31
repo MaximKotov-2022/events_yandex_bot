@@ -74,8 +74,6 @@ class GetData:
         return text
 
 
-class ProcessingDataBot:
-    """Описание методов работы бота."""
 
     def send_message(update, context, text):
         """Отправка сообщений.
