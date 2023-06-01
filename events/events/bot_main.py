@@ -18,6 +18,7 @@ RETRY_PERIOD = 1800
 class GetData:
     """Описание методов обработки данных с сайта."""
 
+    @staticmethod
     def site_parsing() -> str:
         """Получение данных сайта (парсинг)."""
         url = "https://events.yandex.ru/"
@@ -28,6 +29,7 @@ class GetData:
 
         return events
 
+    @staticmethod
     def processing_data_website() -> list:
         """Обработка данных сайта после парсинга.
 
@@ -59,7 +61,7 @@ class GetData:
 
         return data_events
 
-    def process_information_parsing(update, context) -> list:
+    def process_information_parsing(self, context) -> list:
         """Обработка информации после парсинга.
 
         Возвращает строчку с данными о событиях."""
@@ -74,14 +76,16 @@ class GetData:
         return text
 
 
+class ProcessingDataBot:
+    """Описание методов работы бота."""
 
-    def send_message(update, context, text):
+    def send_message(self, context, text):
         """Отправка сообщений.
 
         Принимает текст сообщения.
         """
 
-        chat = update.effective_chat
+        chat = self.effective_chat
 
         buttons = ReplyKeyboardMarkup([
             ['Все мероприятия'],
@@ -100,27 +104,27 @@ class GetData:
         )
         return 0
 
-    def all_events(update, context):
+    def all_events(self, context):
         """Актуальные мероприятия."""
 
-        text = ''.join(GetData.process_information_parsing(update, context))
+        text = ''.join(GetData.process_information_parsing(self, context))
 
         return ProcessingDataBot.send_message(
-                update,
+                self,
                 context,
                 text=text,
             )
 
-    def checking_data_changes(update, context):
+    def checking_data_changes(self, context):
         """Проверка изменений/обновлений данных с сайта.
 
         Если данные изменились, то возвращается True
         Если нет - False."""
 
         while True:
-            old_data = GetData.process_information_parsing(update, context)
+            old_data = GetData.process_information_parsing(self, context)
             time.sleep(RETRY_PERIOD)  # Интервал проверки обновлений на сайте
-            new_data = GetData.process_information_parsing(update, context)
+            new_data = GetData.process_information_parsing(self, context)
 
             if old_data != new_data:
                 old_data = new_data
@@ -129,33 +133,33 @@ class GetData:
 
     stop_subscribe_updates = threading.Event()
 
-    def subscribe_updates(update, context):
+    def subscribe_updates(self, context):
         """Подписаться на все обновления мероприятий."""
 
         text = (
             'Вы подписаны!\nПри обновлении данных Вы получите сообщение.'
         )
-        ProcessingDataBot.send_message(update, context, text=text)
+        ProcessingDataBot.send_message(self, context, text=text)
 
         while not ProcessingDataBot.stop_subscribe_updates.is_set():
-            if ProcessingDataBot.checking_data_changes(update, context):
-                ProcessingDataBot.all_events(update, context)
+            if ProcessingDataBot.checking_data_changes(self, context):
+                ProcessingDataBot.all_events(self, context)
 
         # если подписка остановлена, сбрасываем флаг
         ProcessingDataBot.stop_subscribe_updates.clear()
 
-    def unsubscribe(update, context):
+    def unsubscribe(self, context):
         """Отписка от обновлений мероприятий.
 
         Остановка функции подписки на обновления (subscribe_updates)."""
 
         text = "Вы отписаны"
-        ProcessingDataBot.send_message(update, context, text=text)
+        ProcessingDataBot.send_message(self, context, text=text)
 
         # останавливаем подписку на обновления
         ProcessingDataBot.stop_subscribe_updates.set()
 
-    def add_event_calendar(update, context):
+    def add_event_calendar(self, context):
         data = GetData.processing_data_website()
         k_date_event = []
         for _, event in enumerate(data):
@@ -170,10 +174,10 @@ class GetData:
 
         # Из k_date_event получаем количество и название кнопок.
         # Она хранит дату мероприятия.
-        # Нжуно дату передавать в календарь через API и добавлять мероприятие.
+        # Нужно дату передавать в календарь через API и добавлять мероприятие.
         # Какие данные ещё нужны? (Дата в гггг-мм-чч, название Event)
 
-    def hi_say_first_message(update, context):
+    def hi_say_first_message(self, context):
         """Отправка первого сообщения.
 
         Получение инфо о возможностях бота."""
@@ -190,7 +194,7 @@ class GetData:
                 )
 
         return ProcessingDataBot.send_message(
-                update,
+                self,
                 context,
                 text=text,
             )
