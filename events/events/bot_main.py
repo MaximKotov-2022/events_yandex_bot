@@ -3,7 +3,6 @@ import os
 import threading
 import time
 from urllib.request import urlopen
-
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from telegram import ParseMode, ReplyKeyboardMarkup
@@ -160,6 +159,8 @@ class ProcessingDataBot:
         ProcessingDataBot.stop_subscribe_updates.set()
 
     def add_event_calendar(self, context):
+        """Отправка запроса на добавление события в календарь."""
+
         data = GetData.processing_data_website()
         k_date_event = []
         for _, event in enumerate(data):
