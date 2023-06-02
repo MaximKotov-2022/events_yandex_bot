@@ -1,4 +1,5 @@
 import datetime
+import locale
 import os
 import threading
 import time
@@ -63,7 +64,7 @@ class GetData:
 
         date_year = str(datetime.date.today().year)
 
-        return (
+        return str(
             datetime.datetime.strptime(
                 date_year + '-' + date_month + '-' + date_number,
                 "%Y-%m-%d"
@@ -74,7 +75,7 @@ class GetData:
     def processing_data_website() -> list:
         """Обработка данных сайта после парсинга.
 
-        Возвращает словарь (date, name, site).
+        Возвращает словарь (date, name, site). Сериализация.
         """
 
         events = GetData.site_parsing()
@@ -82,9 +83,9 @@ class GetData:
 
         for event in events:
             if len(event) != 0:
-                date = str(GetData.date_converter(
+                date = GetData.date_converter(
                     event.find(class_='event-card__date').text
-                ))
+                )
                 name = event.find(class_='event-card__title').text
                 if 'https' not in event.find('a').get('href'):
                     site = (
@@ -96,7 +97,7 @@ class GetData:
 
                 data_events.append(
                     {
-                        "date": date,
+                        "date": str(date),
                         "name": name,
                         "site": site,
                     }
@@ -107,10 +108,11 @@ class GetData:
     def process_information_parsing(self, context) -> list:
         """Обработка информации после парсинга.
 
-        Возвращает строчку с данными о событиях для бота."""
+        Возвращает строчку с данными о событиях для БОТа."""
 
         data = GetData.processing_data_website()
         text = []
+        locale.setlocale(locale.LC_ALL, '')
         for event in data:
             date = (
                 datetime.datetime.strptime(event['date'], "%Y-%m-%d")
