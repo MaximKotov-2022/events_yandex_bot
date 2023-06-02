@@ -3,6 +3,7 @@ import os
 import threading
 import time
 from urllib.request import urlopen
+
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from telegram import ParseMode, ReplyKeyboardMarkup
@@ -28,6 +29,47 @@ class GetData:
 
         return events
 
+    def date_converter(date: str) -> str:
+        '''Конвертер даты к виду гггг-мм-дд.
+
+        Принмает: строку.'''
+
+        date = date.split()
+
+        if date[0] == 'сегодня':
+            date[0] = (str(datetime.date.today()))
+        elif date[0] == 'завтра':
+            date[0] = (str(datetime.date.today() + 1))
+
+        date_number = date[1]
+        if len(date_number) < 2:
+            date_number = '0' + date_number
+
+        MONTHS = {
+            'января': '01',
+            'февраля': '02',
+            'марта': '03',
+            'апреля': '04',
+            'мая': '05',
+            'июня': '06',
+            'июля': '07',
+            'августа': '08',
+            'сентября': '09',
+            'октября': '10',
+            'ноября': '11',
+            'декабря': '12'
+        }
+        date_month = MONTHS[date[2]]
+
+        date_year = str(datetime.date.today().year)
+
+        return (
+            datetime.datetime.strptime(
+                date_year + '-' + date_month + '-' + date_number,
+                "%Y-%m-%d"
+            ).date()
+        )
+
     @staticmethod
     def processing_data_website() -> list:
         """Обработка данных сайта после парсинга.
@@ -40,7 +82,9 @@ class GetData:
 
         for event in events:
             if len(event) != 0:
-                date = event.find(class_='event-card__date').text
+                date = str(GetData.date_converter(
+                    event.find(class_='event-card__date').text
+                ))
                 name = event.find(class_='event-card__title').text
                 if 'https' not in event.find('a').get('href'):
                     site = (
@@ -63,12 +107,14 @@ class GetData:
     def process_information_parsing(self, context) -> list:
         """Обработка информации после парсинга.
 
-        Возвращает строчку с данными о событиях."""
+        Возвращает строчку с данными о событиях для бота."""
 
         data = GetData.processing_data_website()
         text = []
         for event in data:
-            date = event['date']
+            date = (
+                datetime.datetime.strptime(event['date'], "%Y-%m-%d")
+            ).strftime("%a, %d %B")
             name = event['name']
             site = event['site']
             text.append(f'Дата: {date}\nНазвание: {name}\nСайт: {site}\n\n\n')
@@ -161,22 +207,10 @@ class ProcessingDataBot:
     def add_event_calendar(self, context):
         """Отправка запроса на добавление события в календарь."""
 
-        data = GetData.processing_data_website()
-        k_date_event = []
-        for _, event in enumerate(data):
-            if 'сегодня' in event['date']:
-                k_date_event.append(str(datetime.date.today()))
-            elif 'завтра' in event['date']:
-                k_date_event.append(str(datetime.date.today() + 1))
-            else:
-                k_date_event.append(event['date'])
+        # data = GetData.processing_data_website()
 
-        print(k_date_event)
-
-        # Из k_date_event получаем количество и название кнопок.
-        # Она хранит дату мероприятия.
-        # Нужно дату передавать в календарь через API и добавлять мероприятие.
-        # Какие данные ещё нужны? (Дата в гггг-мм-чч, название Event)
+        # Работа с API Google Calendar.
+        # Разарбатывается...
 
     def hi_say_first_message(self, context):
         """Отправка первого сообщения.
