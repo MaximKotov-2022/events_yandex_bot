@@ -64,7 +64,7 @@ class GetData:
 
         date_year = str(datetime.date.today().year)
 
-        return str(
+        return (
             datetime.datetime.strptime(
                 date_year + '-' + date_month + '-' + date_number,
                 "%Y-%m-%d"
