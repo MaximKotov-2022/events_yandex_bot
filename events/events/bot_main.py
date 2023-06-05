@@ -7,7 +7,7 @@ from urllib.request import urlopen
 
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-from telegram import ParseMode, ReplyKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, ParseMode
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 load_dotenv()
