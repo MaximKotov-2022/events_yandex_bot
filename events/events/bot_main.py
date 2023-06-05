@@ -136,7 +136,6 @@ class ProcessingDataBot:
 
         buttons = ReplyKeyboardMarkup([
             ['Все мероприятия'],
-            ['Добавить событие в календарь'],
             ['Подписаться', 'Отписаться'],
         ],
             resize_keyboard=True,
@@ -206,14 +205,6 @@ class ProcessingDataBot:
         # останавливаем подписку на обновления
         ProcessingDataBot.stop_subscribe_updates.set()
 
-    def add_event_calendar(self, context):
-        """Отправка запроса на добавление события в календарь."""
-
-        # data = GetData.processing_data_website()
-
-        # Работа с API Google Calendar.
-        # Разарбатывается...
-
     def hi_say_first_message(self, context):
         """Отправка первого сообщения.
 
@@ -251,12 +242,6 @@ def main():
     updater.dispatcher.add_handler(MessageHandler(
         Filters.text('Все мероприятия'),
         ProcessingDataBot.all_events,
-        run_async=True,
-        )
-    )
-    updater.dispatcher.add_handler(MessageHandler(
-        Filters.text('Добавить событие в календарь'),
-        ProcessingDataBot.add_event_calendar,
         run_async=True,
         )
     )
