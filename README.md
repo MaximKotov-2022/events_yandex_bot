@@ -1,6 +1,8 @@
 # events_yandex_bot
 Проект по получению информации о событиях Яндекса с сайта "events.yandex.ru" через Telegram-бот и API.
 
+### Бот доступен по адресу [@events_yandex_bot](https://t.me/events_yandex_bot)
+
 ## Технологии
 + Python
 + beautifulsoup4
