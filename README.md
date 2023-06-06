@@ -1,5 +1,5 @@
 # events_yandex_bot
-Программа для получения информации о событиях на сайте "events.yandex.ru" через Telegram-бот и API.
+Проект по получению информации о событиях Яндекса с сайта "events.yandex.ru" через Telegram-бот и API.
 
 ## Технологии
 + Python
@@ -111,6 +111,9 @@ pip install -r requirements.txt
 
 Выполнить миграции:
 
+```
+python3 manage.py makemigrations
+```
 ```
 python3 manage.py migrate
 ```

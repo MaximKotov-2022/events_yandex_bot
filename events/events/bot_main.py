@@ -37,39 +37,45 @@ class GetData:
 
         date = date.split()
 
+        flag_data_today_tomorrow = False
         if date[0] == 'сегодня':
-            date[0] = (str(datetime.date.today()))
+            date[0] = str(datetime.date.today())
+            flag_data_today_tomorrow = True
         elif date[0] == 'завтра':
-            date[0] = (str(datetime.date.today() + 1))
+            date[0] = str(datetime.date.today() + datetime.timedelta(days=1))
+            flag_data_today_tomorrow = True
 
-        date_number = date[1]
-        if len(date_number) < 2:
-            date_number = '0' + date_number
+        if flag_data_today_tomorrow is False:
+            date_number = date[1]
+            if len(date_number) < 2:
+                date_number = '0' + date_number
 
-        MONTHS = {
-            'января': '01',
-            'февраля': '02',
-            'марта': '03',
-            'апреля': '04',
-            'мая': '05',
-            'июня': '06',
-            'июля': '07',
-            'августа': '08',
-            'сентября': '09',
-            'октября': '10',
-            'ноября': '11',
-            'декабря': '12'
-        }
-        date_month = MONTHS[date[2]]
+            MONTHS = {
+                'января': '01',
+                'февраля': '02',
+                'марта': '03',
+                'апреля': '04',
+                'мая': '05',
+                'июня': '06',
+                'июля': '07',
+                'августа': '08',
+                'сентября': '09',
+                'октября': '10',
+                'ноября': '11',
+                'декабря': '12'
+            }
 
-        date_year = str(datetime.date.today().year)
+            date_month = MONTHS[date[2]]
+            date_year = str(datetime.date.today().year)
 
-        return (
-            datetime.datetime.strptime(
-                date_year + '-' + date_month + '-' + date_number,
-                "%Y-%m-%d"
-            ).date()
-        )
+            return (
+                datetime.datetime.strptime(
+                    date_year + '-' + date_month + '-' + date_number,
+                    "%Y-%m-%d"
+                ).date()
+            )
+        else:
+            return date[0]
 
     @staticmethod
     def processing_data_website() -> list:
