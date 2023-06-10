@@ -64,8 +64,10 @@ class GetData:
                 'ноября': '11',
                 'декабря': '12'
             }
-
-            date_month = MONTHS[date[2]]
+            try:
+                date_month = MONTHS[date[2]]
+            except KeyError:
+                date_month = MONTHS[date[2].replace(',', '')]
             date_year = str(datetime.date.today().year)
 
             return (
