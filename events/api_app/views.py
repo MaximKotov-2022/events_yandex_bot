@@ -1,8 +1,10 @@
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from .serializers import EventsSerializer
-from events.bot_main import GetData
 from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+from events.bot_main import GetData
+
+from .serializers import EventsSerializer
 
 
 @api_view(['GET'])
